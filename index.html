@@ -1,231 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>달력</title>
+  <meta charset="utf-8">
+  <title>이벤트 달력</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background-color: #f9f9f9;
+      font-family: "Noto Sans KR", Arial, sans-serif;
+      background: linear-gradient(135deg, #e0f2ff, #f9f9ff);
+      display: flex;
+      justify-content: flex-start; /* 위쪽 정렬 */
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+      padding-top: 40px; /* 위쪽 여백 */
+      box-sizing: border-box;
     }
-
-    .calendar-container {
-      display: inline-block;
-      padding: 20px;
+    .calendar {
+      width: 380px;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      padding: 20px;
+      margin-bottom: 20px;
     }
-
-    #calendar {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 10px;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
-
-    #calendar caption {
-      font-size: 24px;
-      margin-bottom: 10px;
+    .header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
     }
-
-    #calendar th,
-    #calendar td {
-      width: 50px;
-      height: 50px;
-      border: 1px solid #ccc;
-      vertical-align: middle;
+    .nav-btn {
+      border: none;
+      background: #f1f5f9;
+      color: #333;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+    .nav-btn:hover {
+      background: #e2e8f0;
+    }
+    .days, .dates {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+    }
+    .days div {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      padding: 8px 0;
+    }
+    .dates div {
+      padding: 12px 0;
+      font-size: 15px;
+      border-radius: 50%;
       cursor: pointer;
       position: relative;
-      transition: background-color 0.3s;
+      transition: background 0.4s ease, color 0.4s ease;
     }
-
-    #calendar th {
-      background-color: #f2f2f2;
+    .dates div:hover {
+      background: #f1f5f9;
     }
-
-    .sunday, .saturday {
-      background-color: #ffe5e5;
-    }
-
-    .has-event {
-      background-color: #d0eaff !important;
-    }
-
-    #calendar td:hover {
-      background-color: #a8d5ff;
-    }
-
-    #calendar td.today {
-      border: 2px solid #4caf50;
-    }
-
-    #calendar td.selected {
-      background-color: #4caf50;
+    .today {
+      background: #007bff;
       color: white;
       font-weight: bold;
     }
+    .selected {
+      background: linear-gradient(135deg, #ffffff, #10b981);
+      color: white;
+      font-weight: bold;
+      animation: selectAnim 0.5s forwards;
+    }
+    @keyframes selectAnim {
+      0% { background: #ffffff; color: #333; }
+      100% { background: #10b981; color: #fff; }
+    }
+    .sunday { color: #e11d48; }
+    .saturday { color: #2563eb; }
 
-    .nav-buttons {
-      margin-bottom: 10px;
+    /* 이벤트 날짜 표시 (노란색 배경) */
+    .event {
+      background: #facc15 !important;
+      color: #000 !important;
+      font-weight: bold;
     }
 
-    .nav-buttons button {
+    #eventInfo {
       font-size: 16px;
-      padding: 5px 10px;
-      margin: 0 5px;
-    }
-
-    #event-display {
-      margin-top: 20px;
-      font-size: 18px;
+      font-weight: bold;
       color: #333;
-      white-space: pre-line;
     }
 
-    a.event-link {
-      display: block;
-      margin: 5px 0;
-      color: #007bff;
-      text-decoration: underline;
-      cursor: pointer;
+    @media (max-width: 420px) {
+      .calendar { width: 95%; }
     }
   </style>
 </head>
 <body>
-
-  <div class="calendar-container">
-    <div class="nav-buttons">
-      <button id="prevMonth">이전 달</button>
-      <button id="nextMonth">다음 달</button>
+  <div class="calendar">
+    <div class="header">
+      <button class="nav-btn" id="prev">◀</button>
+      <h2 id="monthYear">2025년 9월</h2>
+      <button class="nav-btn" id="next">▶</button>
     </div>
-
-    <table id="calendar">
-      <caption></caption>
-      <thead>
-        <tr>
-          <th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div id="event-display">선택된 날짜: 없음</div>
+    <div class="days">
+      <div class="sunday">일</div><div>월</div><div>화</div>
+      <div>수</div><div>목</div><div>금</div><div class="saturday">토</div>
+    </div>
+    <div class="dates" id="dates"></div>
   </div>
 
-  <script>
-    let currentYear, currentMonth;
-    const today = new Date();
-    const caption = document.querySelector("#calendar caption");
-    const tbody = document.querySelector("#calendar tbody");
-    const eventDisplay = document.getElementById("event-display");
-    let selectedCell = null;
+  <div id="eventInfo">날짜를 선택하세요.</div>
 
-    const scheduleMap = {
-      "05-23": ["수학 수행평가(구술&마인드맵)", "역사일기 수행평가"],
-      "05-26": ["수학 수행평가(구술&마인드맵)", "역사일기 수행평가"],
-      "05-27": ["수학 수행평가(구술&마인드맵)", "역사일기 수행평가"],
-      "05-19": ["역사일기 수행평가"],
-      "05-20": ["역사일기 수행평가"],
-      "05-21": ["역사일기 수행평가"],
-      "05-22": ["역사일기 수행평가"],
-      "06-02": ["수학 수행평가(독서)"],
-      "06-03": ["수학 수행평가(독서)"],
-      "06-04": ["6월 모의고사"],
-      "06-05": ["수학 수행평가(독서)"],
-      "06-24": ["기말고사"],
-      "06-25": ["기말고사"],
-      "06-26": ["기말고사"],
-      "06-27": ["기말고사"],
+  <script>
+    const monthYear = document.getElementById("monthYear");
+    const dates = document.getElementById("dates");
+    const eventInfo = document.getElementById("eventInfo");
+    let viewDate = new Date();
+    let selectedDate = null;
+
+    // 이벤트 데이터
+    const events = {
+      "2025-09-23": "영어 수행평가",
+      "2025-09-29": "중간고사",
+      "2025-09-30": "중간고사",
+      "2025-10-01": "중간고사",
+      "2025-10-02": "중간고사"
     };
 
-    function generateCalendar(year, month) {
-      currentYear = year;
-      currentMonth = month;
-      caption.textContent = `${year}년 ${month + 1}월`;
-      tbody.innerHTML = "";
+    function formatDate(year, month, day) {
+      return `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    }
+
+    function renderCalendar() {
+      dates.innerHTML = "";
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+
+      monthYear.textContent = `${year}년 ${month+1}월`;
 
       const firstDay = new Date(year, month, 1).getDay();
-      const lastDate = new Date(year, month + 1, 0).getDate();
+      const lastDate = new Date(year, month+1, 0).getDate();
 
-      let row = document.createElement("tr");
-
-      for (let i = 0; i < firstDay; i++) {
-        row.appendChild(document.createElement("td"));
+      for(let i=0;i<firstDay;i++){
+        dates.innerHTML += "<div></div>";
       }
 
-      for (let date = 1; date <= lastDate; date++) {
-        const cell = document.createElement("td");
-        cell.textContent = date;
+      const today = new Date();
+      for(let d=1; d<=lastDate; d++){
+        const date = document.createElement("div");
+        date.textContent = d;
 
-        const dayOfWeek = (firstDay + date - 1) % 7;
-        if (dayOfWeek === 0) cell.classList.add("sunday");
-        if (dayOfWeek === 6) cell.classList.add("saturday");
+        const current = new Date(year, month, d);
+        const key = formatDate(year, month, d);
 
-        const key = `${(month + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-        if (scheduleMap[key]) {
-          cell.classList.add("has-event");
+        // 오늘
+        if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear()){
+          date.classList.add("today");
         }
 
-        if (
-          year === today.getFullYear() &&
-          month === today.getMonth() &&
-          date === today.getDate()
-        ) {
-          cell.classList.add("today");
+        // 선택된 날짜
+        if(selectedDate &&
+           d === selectedDate.getDate() &&
+           month === selectedDate.getMonth() &&
+           year === selectedDate.getFullYear()){
+          date.classList.add("selected");
         }
 
-        cell.addEventListener("click", () => {
-          if (selectedCell) selectedCell.classList.remove("selected");
-          cell.classList.add("selected");
-          selectedCell = cell;
+        // 이벤트 표시
+        if(events[key]){
+          date.classList.add("event");
+        }
 
-          const events = scheduleMap[key];
-          if (events) {
-            eventDisplay.innerHTML = `${year}년 ${month + 1}월 ${date}일 일정:\n` + events.map(event => {
-              let url = '';
-              if (event.includes("수학")) url = 'https://mymompretty.github.io/test.github.io/';
-              if (event.includes("역사")) url = 'https://mymompretty.github.io/home.github.io/';
-              if (event.includes("모의고사")) url = 'https://mymompretty.github.io/kimch.github.io/';
-              if (url) {
-                return `<a class="event-link" href="${url}" target="_blank">${event}</a>`;
-              } else {
-                return `<div>${event}</div>`;
-              }
-            }).join('');
+        // 요일 색상
+        if(current.getDay() === 0) date.classList.add("sunday");
+        if(current.getDay() === 6) date.classList.add("saturday");
+
+        // 클릭 이벤트
+        date.addEventListener("click", () => {
+          selectedDate = current;
+          renderCalendar();
+          if(events[key]){
+            eventInfo.textContent = `${key} → ${events[key]}`;
           } else {
-            eventDisplay.textContent = `${year}년 ${month + 1}월 ${date}일 - 일정 없음`;
+            eventInfo.textContent = `${key}에는 일정이 없습니다.`;
           }
         });
 
-        row.appendChild(cell);
-
-        if ((firstDay + date) % 7 === 0 || date === lastDate) {
-          tbody.appendChild(row);
-          row = document.createElement("tr");
-        }
+        dates.appendChild(date);
       }
     }
 
-    document.getElementById("prevMonth").addEventListener("click", () => {
-      if (currentMonth === 0) {
-        generateCalendar(currentYear - 1, 11);
-      } else {
-        generateCalendar(currentYear, currentMonth - 1);
-      }
-    });
+    document.getElementById("prev").onclick = () => {
+      viewDate.setMonth(viewDate.getMonth()-1);
+      renderCalendar();
+    };
+    document.getElementById("next").onclick = () => {
+      viewDate.setMonth(viewDate.getMonth()+1);
+      renderCalendar();
+    };
 
-    document.getElementById("nextMonth").addEventListener("click", () => {
-      if (currentMonth === 11) {
-        generateCalendar(currentYear + 1, 0);
-      } else {
-        generateCalendar(currentYear, currentMonth + 1);
-      }
-    });
-
-    generateCalendar(today.getFullYear(), today.getMonth());
+    renderCalendar();
   </script>
-
 </body>
 </html>
