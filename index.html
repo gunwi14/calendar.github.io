@@ -74,6 +74,14 @@
       font-size: 14px;
       display: none;
     }
+    .event a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .event a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -136,11 +144,11 @@
           date.classList.add("highlight");
           date.onclick = () => {
             if(typeof events[key] === "object" && events[key].link){
-              window.location.href = events[key].link; // 링크로 이동
+              eventBox.innerHTML = `<a href="${events[key].link}" target="_blank">${events[key].text}</a>`;
             } else {
               eventBox.textContent = events[key];
-              eventBox.style.display = "block";
             }
+            eventBox.style.display = "block";
           };
         }
 
