@@ -11,25 +11,25 @@
       align-items: flex-start;
       height: 100vh;
       margin: 0;
-      /* 🌟 연한 파란색 그라데이션 배경 */
       background: linear-gradient(180deg, #e6f3ff, #cce6ff);
       padding-top: 30px;
     }
     .calendar {
-      width: 340px;
+      width: 90%;              /* 화면에 맞게 조정 */
+      max-width: 500px;        /* 너무 크지 않도록 제한 */
       background: white;
       border: 1px solid #ddd;
       border-radius: 12px;
-      padding: 16px;
+      padding: 20px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 20px;
     }
     .days, .dates {
       display: grid;
@@ -39,13 +39,14 @@
     .days div {
       font-size: 14px;
       color: #666;
-      padding: 6px 0;
+      padding: 8px 0;
     }
     .dates div {
-      padding: 10px 0;
+      padding: 14px 0;
       cursor: pointer;
       border-radius: 50%;
       transition: background 0.4s ease;
+      font-size: 16px;
     }
     .dates div:hover {
       background: linear-gradient(135deg, #e0f7e9, #b2f2bb);
@@ -63,16 +64,16 @@
     button {
       border: none;
       background: none;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
     }
     .event {
-      margin-top: 15px;
-      padding: 10px;
+      margin-top: 18px;
+      padding: 12px;
       background: #f1f1f1;
       border-radius: 8px;
       text-align: center;
-      font-size: 14px;
+      font-size: 16px;
       display: none;
     }
     .event a {
