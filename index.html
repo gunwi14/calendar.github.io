@@ -97,5 +97,77 @@
       <div>일</div><div>월</div><div>화</div><div>수</div>
       <div>목</div><div>금</div><div>토</div>
     </div>
-    <div class="dates" i
+    <div class="dates" id="dates"></div>
+    <div class="event" id="event"></div>
+  </div>
 
+  <script>
+    const monthYear = document.getElementById("monthYear");
+    const dates = document.getElementById("dates");
+    const eventBox = document.getElementById("event");
+    let viewDate = new Date();
+
+    // 일정 데이터 (9월 23일 일정 제거됨)
+    const events = {
+      "2025-09-29": "중간고사",
+      "2025-09-30": "중간고사",
+      "2025-10-01": "중간고사",
+      "2025-10-02": "중간고사"
+    };
+
+    function renderCalendar() {
+      dates.innerHTML = "";
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+
+      monthYear.textContent = `${year}년 ${month + 1}월`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        dates.innerHTML += "<div></div>";
+      }
+
+      const today = new Date();
+      for (let d = 1; d <= lastDate; d++) {
+        const date = document.createElement("div");
+        date.textContent = d;
+        const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+        if (
+          d === today.getDate() &&
+          month === today.getMonth() &&
+          year === today.getFullYear()
+        ) {
+          date.classList.add("today");
+        }
+
+        if (events[key]) {
+          date.classList.add("highlight");
+          date.onclick = () => {
+            eventBox.textContent = events[key];
+            eventBox.style.display = "block";
+          };
+        }
+
+        dates.appendChild(date);
+      }
+    }
+
+    document.getElementById("prev").onclick = () => {
+      viewDate.setMonth(viewDate.getMonth() - 1);
+      renderCalendar();
+      eventBox.style.display = "none";
+    };
+
+    document.getElementById("next").onclick = () => {
+      viewDate.setMonth(viewDate.getMonth() + 1);
+      renderCalendar();
+      eventBox.style.display = "none";
+    };
+
+    renderCalendar();
+  </script>
+</body>
+</html>
