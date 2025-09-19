@@ -146,8 +146,8 @@
         if (events[key]) {
           date.classList.add("highlight");
           date.onclick = () => {
-            eventBox.textContent = events[key];
-            eventBox.style.display = "block";
+            // 중간고사 일정 클릭시 링크 새 탭 오픈
+            window.open("https://gunwi14.github.io/1.github.io/", "_blank");
           };
         }
 
